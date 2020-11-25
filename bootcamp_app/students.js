@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
-const inputArg = process.argv.slice(2);
-
+const cohortName = process.argv[2];
+const limit = process.argv[3] || 5;
 
 const pool = new Pool({
   user: 'vagrant',
@@ -32,17 +32,23 @@ LIMIT 5;
   res.rows.forEach(user => {
     console.log(`${user.name} has an id of ${user.id} and was in the ${user.cohort_id} cohort`);
   })
-}); */
-
+});
+ */
 
 //Use argv for input
-pool.query(`
+
+const queryString = `
 SELECT students.id, students.name, cohort_id
 FROM students
 JOIN cohorts ON students.cohort_id = cohorts.id 
-WHERE cohorts.name LIKE '%${inputArg[0]}%'
-LIMIT ${inputArg[1]};
-`)
+WHERE cohorts.name LIKE $1
+LIMIT $2;
+`
+
+// Store all potentially malicious values in an array. 
+const values = [`%${cohortName}%`, limit];
+
+pool.query(queryString, values)
 .then(res => {
   res.rows.forEach(user => {
     console.log(`${user.name} has an id of ${user.id} and was in the ${user.cohort_id} cohort`);

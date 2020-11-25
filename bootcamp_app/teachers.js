@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 
-const inputArg = process.argv.slice(2);
+const cohortName = process.argv[2];
+
 
 const pool = new Pool({
   user: 'vagrant',
@@ -17,8 +18,10 @@ FROM assistance_requests reqs
 JOIN teachers ON teachers.id = reqs.teacher_id
 JOIN students ON students.id = reqs.student_id
 JOIN cohorts ON students.cohort_id = cohorts.id
-WHERE cohorts.name = '${inputArg[0]}'
+WHERE cohorts.name = $1
 ORDER BY teacher;`
+
+const values = [cohortName];
 
 pool.query(sqlQuery4)
   .then(res => {
